@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -17,25 +18,19 @@ const UserSchema = new mongoose.Schema({
         minlength: 8,
         maxLength: 20,
         required: [true, 'Password is required'],
-        validate(value) {
+        async validate(value) {
             if (this.isModified('password')) {
                 this.password = value;
+            } else {
+                return;
             }
-            else {
-                return next();
-            }
-            bcrypt.genSalt(10, (err, salt) => {
-                if (err) throw err;
-                bcrypt.hash(this.password, salt, (error, hashedPass) => {
-                    if (error) throw error;
-                    this.password = hashedPass;
-                    next()
-                })
-            });
+            const salt = await bcrypt.genSalt(10);
+            const hashedPass = await bcrypt.hash(this.password, salt);
+            this.password = hashedPass;
         }
     }
-},{timestamps:true});
+}, { timestamps: true });
 
-const User = mongoose.model('User',UserSchema);
+const User = mongoose.model('User', UserSchema);
 
 export default User;
