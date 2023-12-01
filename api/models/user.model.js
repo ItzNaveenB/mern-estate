@@ -15,20 +15,8 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        minlength: 8,
-        maxLength: 20,
-        required: [true, 'Password is required'],
-        async validate(value) {
-            if (this.isModified('password')) {
-                this.password = value;
-            } else {
-                return;
-            }
-            const salt = await bcrypt.genSalt(10);
-            const hashedPass = await bcrypt.hash(this.password, salt);
-            this.password = hashedPass;
-        }
-    }
+        required: true,
+    },
 }, { timestamps: true });
 
 const User = mongoose.model('User', UserSchema);
